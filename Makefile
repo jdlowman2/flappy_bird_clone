@@ -22,3 +22,4 @@ all: $(OBJS)
 
 graphics:
 	$(CC) -c draw_map.cc && $(CC) draw_map.o -o sfml-draw_map -lsfml-graphics -lsfml-window -lsfml-system
+
