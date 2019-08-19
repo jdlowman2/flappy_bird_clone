@@ -1,3 +1,3 @@
 #!/bin/bash
 
-make graphics && ./sfml-draw_map 
+make all && ./flappy-bird 
