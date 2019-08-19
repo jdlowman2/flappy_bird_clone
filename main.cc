@@ -113,9 +113,7 @@ bool is_collision(const Bird & bird, const std::vector<sf::RectangleShape> & rec
     return false;
 }
 
-
-
-sf::Text draw_game_over()
+sf::Text draw_game_over_text()
 {
     sf::Text text;
 
@@ -127,18 +125,20 @@ sf::Text draw_game_over()
     return text;
 }
 
-
-
-int main()
+void draw_game_over(sf::RenderWindow & window, Bird & bird)
 {
-    sf::RenderWindow window(sf::VideoMode(MAX_WIDTH, MAX_HEIGHT), "SFML works!");
+    if (bird.is_dead())
+    {
+        const auto dead_bird_shape = make_dead_bird_shape(bird);
+        window.draw(dead_bird_shape);
+        const auto text = draw_game_over_text();
+        window.draw(text);
+        window.display();
+    }
+}
 
-    Bird bird;
-
-    auto rectangles = make_rectangles();
-    int indx = 0;
-    bool shouldFlap = false;
-
+void wait_to_start_game(sf::RenderWindow & window, Bird & bird, std::vector<sf::RectangleShape> & rectangles)
+{
     std::cout << "Press <spacebar> to start" << std::endl;
 
     bool start_game = false;
@@ -155,10 +155,42 @@ int main()
             }
         }
     }
+
+    return;
+}
+
+
+void wait_to_close_window(sf::RenderWindow & window)
+{
+    std::cout << "Press <Q> in the game screen to exit" << std::endl;
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) || event.type == sf::Event::Closed)
+            {
+                window.close();
+            }
+        }
+    }
+
+    return;
+}
+
+
+int main()
+{
+    sf::RenderWindow window(sf::VideoMode(MAX_WIDTH, MAX_HEIGHT), "Flappy Bird!");
+
+    auto bird = Bird();
+    auto rectangles = make_rectangles();
+    bool shouldFlap = false;
+
+    wait_to_start_game(window, bird, rectangles);
  
     while (window.isOpen() && !bird.is_dead())
     {
-        indx++;
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -181,31 +213,13 @@ int main()
             bird.set_dead(true);
         }
 
-        std::this_thread::sleep_for (std::chrono::milliseconds(25));
+        std::this_thread::sleep_for (std::chrono::milliseconds(UDPATE_RATE_MILLIS));
     }
 
 
-    if (bird.is_dead())
-    {
-        const auto dead_bird_shape = make_dead_bird_shape(bird);
-        window.draw(dead_bird_shape);
-        const auto text = draw_game_over();
-        window.draw(text);
-        window.display();
-    }
+    draw_game_over(window, bird);
 
-    std::cout << "Press <Q> in the game screen to exit" << std::endl;
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) || event.type == sf::Event::Closed)
-            {
-                window.close();
-            }
-        }
-    }
+    wait_to_close_window(window);
 
     return 0;
 }
