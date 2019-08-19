@@ -19,4 +19,6 @@ const double TIMESTEP = 0.5;
 
 double SPEED_OBSTACLES = -50.0;
 
-const int UDPATE_RATE_MILLIS = 25;
+const int UPDATE_RATE_MILLIS = 25;
+
+const double BIRD_HORIZONTAL_OFFSET = 100.0;

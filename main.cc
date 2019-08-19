@@ -14,8 +14,6 @@
 const double WINDOW_WIDTH = MAX_WIDTH;
 const double WINDOW_HEIGHT = MAX_HEIGHT;
 
-const double BIRD_HORIZONTAL = 100.0;
-
 std::vector<sf::RectangleShape> make_rectangles()
 {
     const std::vector<std::vector<double>> obstacle_positions {{1000.0, 0.0}, {2000.0, 0.0}, {1500, WINDOW_HEIGHT-500}};
@@ -41,7 +39,7 @@ sf::CircleShape make_bird_shape(const Bird & bird)
     const auto height = bird.get_height();
     sf::CircleShape shape(BIRD_DIAMETER);
     shape.setFillColor(sf::Color::Green);
-    shape.setPosition(BIRD_HORIZONTAL, height);
+    shape.setPosition(BIRD_HORIZONTAL_OFFSET, height);
 
     return shape;
 }
@@ -49,7 +47,7 @@ sf::CircleShape make_bird_shape(const Bird & bird)
 sf::RectangleShape make_bird_rectangle(const Bird & bird)
 {        
     auto rectangle = sf::RectangleShape(sf::Vector2f(2*BIRD_DIAMETER, 2*BIRD_DIAMETER));
-    rectangle.setPosition(BIRD_HORIZONTAL, bird.get_height());
+    rectangle.setPosition(BIRD_HORIZONTAL_OFFSET, bird.get_height());
 
     return rectangle;
 }
@@ -59,7 +57,7 @@ sf::CircleShape make_dead_bird_shape(const Bird & bird)
     const auto height = bird.get_height();
     sf::CircleShape shape(BIRD_DIAMETER);
     shape.setFillColor(sf::Color::Red);
-    shape.setPosition(BIRD_HORIZONTAL, height);
+    shape.setPosition(BIRD_HORIZONTAL_OFFSET, height);
 
     return shape;
 }
@@ -101,12 +99,13 @@ bool is_collision(const Bird & bird, const sf::RectangleShape & rectangle)
     return result;
 }
 
-bool is_collision(const Bird & bird, const std::vector<sf::RectangleShape> & rectangles)
+bool check_for_collisions(Bird & bird, const std::vector<sf::RectangleShape> & rectangles)
 {   
     for (auto rectangle: rectangles)
     {
         if (is_collision(bird, rectangle))
         {
+            bird.set_dead(true);
             return true;
         }
     }
@@ -125,7 +124,7 @@ sf::Text draw_game_over_text()
     return text;
 }
 
-void draw_game_over(sf::RenderWindow & window, Bird & bird)
+void draw_game_over_window(sf::RenderWindow & window, Bird & bird)
 {
     if (bird.is_dead())
     {
@@ -178,6 +177,19 @@ void wait_to_close_window(sf::RenderWindow & window)
     return;
 }
 
+void update_game(sf::RenderWindow & window,
+                 Bird & bird,
+                 std::vector<sf::RectangleShape> & rectangles,
+                 bool shouldFlap)
+{
+    bird.update_state(shouldFlap);
+    update_obstacles(rectangles);
+    update_window(window, bird, rectangles);
+    
+    check_for_collisions(bird, rectangles);
+
+    return;
+}
 
 int main()
 {
@@ -204,20 +216,13 @@ int main()
             }
         }
 
-        bird.update_state(shouldFlap);
-        update_obstacles(rectangles);
-        update_window(window, bird, rectangles);
+        update_game(window, bird, rectangles, shouldFlap);
 
-        if (is_collision(bird, rectangles))
-        {   
-            bird.set_dead(true);
-        }
-
-        std::this_thread::sleep_for (std::chrono::milliseconds(UDPATE_RATE_MILLIS));
+        std::this_thread::sleep_for (std::chrono::milliseconds(UPDATE_RATE_MILLIS));
     }
 
 
-    draw_game_over(window, bird);
+    draw_game_over_window(window, bird);
 
     wait_to_close_window(window);
 
