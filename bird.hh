@@ -13,28 +13,28 @@ class Bird
 public:
     Bird()
     {
-        height_ = 0;
+        height_ = MAX_HEIGHT/2.0;
         velocity_ = FLAP_VELOCITY;
         acceleration_ = GRAVITY;
+        is_dead_ = false;
     }
 
     void flap()
     {
-        height_ = std::min(height_ + FLAP_HEIGHT, MAX_HEIGHT);
-
+        set_height(height_ + FLAP_HEIGHT);
         return;
     }
 
     void drop()
     {
-        height_ = std::max(height_ - DROP_DISTANCE, MIN_HEIGHT);
-
+        set_height(height_ - DROP_DISTANCE);
         return; 
     }
 
     void set_height(const double new_height)
     {
         height_ = std::min(new_height, MAX_HEIGHT);
+        height_ = std::max(new_height, MIN_HEIGHT);
 
         return;
     }
@@ -53,6 +53,11 @@ public:
 
         print_state();
 
+        if (height_ <= MIN_HEIGHT || height_ >= MAX_HEIGHT)
+        {
+            set_dead(true);
+        }
+
         return;
     }
 
@@ -68,8 +73,18 @@ public:
 
     void print_state() const
     {
-        std::cout << "Height| Velocity | Acceleration " << std::endl;
-        std::cout << height_ << "  "<< velocity_<< "  " << acceleration_ << std::endl;
+        std::cout << "Height| Velocity | Acceleration | Alive " << std::endl;
+        std::cout << height_ << "  "<< velocity_<< "  " << acceleration_ << "   "<< is_dead_ << std::endl;
+    }
+
+    bool is_dead() const
+    {
+        return is_dead_;
+    }
+
+    void set_dead(const bool status)
+    {
+        is_dead_ = status;
     }
 
 private:
@@ -78,4 +93,6 @@ private:
     double velocity_;
 
     double acceleration_;
+
+    bool is_dead_;
 };

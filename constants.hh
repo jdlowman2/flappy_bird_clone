@@ -1,5 +1,7 @@
 #pragma once
 
+const double BIRD_DIAMETER = 100.0;
+
 const double FLAP_HEIGHT = -200.0;
 const double FLAP_VELOCITY = -200.0;
 

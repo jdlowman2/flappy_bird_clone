@@ -15,7 +15,6 @@ const double WINDOW_WIDTH = MAX_WIDTH;
 const double WINDOW_HEIGHT = MAX_HEIGHT;
 
 const double BIRD_HORIZONTAL = 100.0;
-const double BIRD_DIAMETER = 100.0;
 
 std::vector<sf::RectangleShape> make_rectangles()
 {
@@ -49,7 +48,7 @@ sf::CircleShape make_bird_shape(const Bird & bird)
 
 sf::RectangleShape make_bird_rectangle(const Bird & bird)
 {        
-    auto rectangle = sf::RectangleShape(sf::Vector2f(200.f, 200.f));
+    auto rectangle = sf::RectangleShape(sf::Vector2f(2*BIRD_DIAMETER, 2*BIRD_DIAMETER));
     rectangle.setPosition(BIRD_HORIZONTAL, bird.get_height());
 
     return rectangle;
@@ -58,7 +57,7 @@ sf::RectangleShape make_bird_rectangle(const Bird & bird)
 sf::CircleShape make_dead_bird_shape(const Bird & bird)
 {
     const auto height = bird.get_height();
-    sf::CircleShape shape(100.f);
+    sf::CircleShape shape(BIRD_DIAMETER);
     shape.setFillColor(sf::Color::Red);
     shape.setPosition(BIRD_HORIZONTAL, height);
 
@@ -77,6 +76,7 @@ void update_window(sf::RenderWindow & window, const Bird & bird, const std::vect
 {
     window.clear();
     window.draw(make_bird_shape(bird));
+    // window.draw(make_bird_rectangle(bird)); // The collision detection for the bird
     for (auto rect: rectangles)
     {
         window.draw(rect);
@@ -91,7 +91,6 @@ bool is_collision(const Bird & bird, const sf::RectangleShape & rectangle)
     const auto bird_bounds = bird_rectangle.getGlobalBounds();
     const auto obstacle_bounds = rectangle.getGlobalBounds();
 
-
     auto result = obstacle_bounds.intersects(bird_bounds);
 
     if (result == 1)
@@ -104,12 +103,6 @@ bool is_collision(const Bird & bird, const sf::RectangleShape & rectangle)
 
 bool is_collision(const Bird & bird, const std::vector<sf::RectangleShape> & rectangles)
 {   
-    const auto height = bird.get_height();
-    if (height <= 0.0 || height >= MAX_HEIGHT)
-    {
-        return true;
-    }
-
     for (auto rectangle: rectangles)
     {
         if (is_collision(bird, rectangle))
@@ -141,12 +134,10 @@ int main()
     sf::RenderWindow window(sf::VideoMode(MAX_WIDTH, MAX_HEIGHT), "SFML works!");
 
     Bird bird;
-    bird.set_height(MAX_HEIGHT-1000);
 
     auto rectangles = make_rectangles();
     int indx = 0;
     bool shouldFlap = false;
-    bool is_dead = false;
 
     std::cout << "Press <spacebar> to start" << std::endl;
 
@@ -165,7 +156,7 @@ int main()
         }
     }
  
-    while (window.isOpen() && !is_dead)
+    while (window.isOpen() && !bird.is_dead())
     {
         indx++;
         sf::Event event;
@@ -187,14 +178,14 @@ int main()
 
         if (is_collision(bird, rectangles))
         {   
-            is_dead = true;
+            bird.set_dead(true);
         }
 
         std::this_thread::sleep_for (std::chrono::milliseconds(25));
     }
 
 
-    if (is_dead)
+    if (bird.is_dead())
     {
         const auto dead_bird_shape = make_dead_bird_shape(bird);
         window.draw(dead_bird_shape);

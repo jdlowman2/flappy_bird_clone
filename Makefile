@@ -10,9 +10,6 @@ LIBS = bird.hh
 # -Wall will turn on all standard warnings
 COMPILER_FLAGS = -Wall
 
-# # LINKER_FLAGS specifies the libraries we're linking against
-# LINKER_FLAGS = -lGL -lGLU -lglut -lGLEW -lglfw3 -lX11 -lXxf86vm -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
-
 # OBJ_NAME specifies the name of our exectuable
 OBJ_NAME = main
 
@@ -21,5 +18,4 @@ all: $(OBJS)
 	$(CC) $(LIBS) $(OBJS) $(COMPILER_FLAGS) -o $(OBJ_NAME)
 
 graphics:
-	$(CC) -c draw_map.cc && $(CC) draw_map.o -o sfml-draw_map -lsfml-graphics -lsfml-window -lsfml-system
-
+	$(CC) draw_map.cc -o sfml-draw_map -lsfml-graphics -lsfml-window -lsfml-system
