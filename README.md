@@ -9,3 +9,5 @@ Note that this game relies on SFML for graphics. SFML can be installed on Ubuntu
 
 
 To run the game, simple run the executable `./run.sh`
+
+![Image of Gameplay](game_screenshot.png)
