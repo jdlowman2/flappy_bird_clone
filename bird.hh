@@ -17,6 +17,7 @@ public:
         velocity_ = FLAP_VELOCITY;
         acceleration_ = GRAVITY;
         is_dead_ = false;
+        diameter_ = BIRD_DIAMETER;
     }
 
     void flap()
@@ -33,8 +34,8 @@ public:
 
     void set_height(const double new_height)
     {
-        height_ = std::min(new_height, MAX_HEIGHT);
-        height_ = std::max(new_height, MIN_HEIGHT);
+        // height_ = std::min(new_height, MAX_HEIGHT);
+        height_ = std::max(std::min(new_height, MAX_HEIGHT), MIN_HEIGHT);
 
         return;
     }
@@ -53,7 +54,7 @@ public:
 
         print_state();
 
-        if (height_ <= MIN_HEIGHT || height_ >= MAX_HEIGHT)
+        if (height_ <= MIN_HEIGHT || height_ >= (MAX_HEIGHT - 2.0*diameter_))
         {
             set_dead(true);
         }
@@ -95,4 +96,6 @@ private:
     double acceleration_;
 
     bool is_dead_;
+
+    double diameter_;
 };

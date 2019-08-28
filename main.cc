@@ -14,9 +14,29 @@
 const double WINDOW_WIDTH = MAX_WIDTH;
 const double WINDOW_HEIGHT = MAX_HEIGHT;
 
+std::vector<sf::RectangleShape> make_rectangle_pair(const double x_pos, const double y_pos)
+{
+    const auto gap_size = 800.f;
+
+    auto top = sf::RectangleShape(sf::Vector2f(50.f, y_pos));
+    top.setFillColor(sf::Color::White);
+    top.setPosition(x_pos, 0.0);
+
+    auto bottom = sf::RectangleShape(sf::Vector2f(50.f, MAX_HEIGHT - y_pos - gap_size));
+    bottom.setFillColor(sf::Color::White);
+    bottom.setPosition(x_pos, y_pos + gap_size);
+
+    std::vector<sf::RectangleShape> pair {top, bottom};
+
+    return pair;
+}
+
+
 std::vector<sf::RectangleShape> make_rectangles()
 {
-    const std::vector<std::vector<double>> obstacle_positions {{1000.0, 0.0}, {2000.0, 0.0}, {1500, WINDOW_HEIGHT-500}};
+    const std::vector<std::vector<double>> obstacle_positions {{1200.0, 0.0}, 
+                                                    {2200.0, 0.0}, 
+                                                    {1500, WINDOW_HEIGHT-500}};
 
     std::vector<sf::RectangleShape> shapes;
 
@@ -31,15 +51,31 @@ std::vector<sf::RectangleShape> make_rectangles()
             shapes.push_back(rectangle);
         }
     }
+
+    for (int offset=0; offset < 1000000; offset+=1000)
+    {
+        auto pair = make_rectangle_pair(800.0 + offset, offset/10.0 + 100);
+        for (auto rect: pair)
+        {
+            shapes.push_back(rect);
+        }
+    }
+
     return shapes;
 }
 
 sf::CircleShape make_bird_shape(const Bird & bird)
 {
-    const auto height = bird.get_height();
     sf::CircleShape shape(BIRD_DIAMETER);
-    shape.setFillColor(sf::Color::Green);
-    shape.setPosition(BIRD_HORIZONTAL_OFFSET, height);
+
+    if (bird.is_dead()){
+        shape.setFillColor(sf::Color::Red);
+    }
+    else {
+        shape.setFillColor(sf::Color::Green);
+    }
+
+    shape.setPosition(BIRD_HORIZONTAL_OFFSET, bird.get_height());
 
     return shape;
 }
@@ -50,16 +86,6 @@ sf::RectangleShape make_bird_rectangle(const Bird & bird)
     rectangle.setPosition(BIRD_HORIZONTAL_OFFSET, bird.get_height());
 
     return rectangle;
-}
-
-sf::CircleShape make_dead_bird_shape(const Bird & bird)
-{
-    const auto height = bird.get_height();
-    sf::CircleShape shape(BIRD_DIAMETER);
-    shape.setFillColor(sf::Color::Red);
-    shape.setPosition(BIRD_HORIZONTAL_OFFSET, height);
-
-    return shape;
 }
 
 void update_obstacles(std::vector<sf::RectangleShape> & obstacles)
@@ -74,7 +100,6 @@ void update_window(sf::RenderWindow & window, const Bird & bird, const std::vect
 {
     window.clear();
     window.draw(make_bird_shape(bird));
-    // window.draw(make_bird_rectangle(bird)); // The collision detection for the bird
     for (auto rect: rectangles)
     {
         window.draw(rect);
@@ -128,7 +153,7 @@ void draw_game_over_window(sf::RenderWindow & window, Bird & bird)
 {
     if (bird.is_dead())
     {
-        const auto dead_bird_shape = make_dead_bird_shape(bird);
+        const auto dead_bird_shape = make_bird_shape(bird);
         window.draw(dead_bird_shape);
         const auto text = draw_game_over_text();
         window.draw(text);
@@ -196,7 +221,12 @@ int main()
     sf::RenderWindow window(sf::VideoMode(MAX_WIDTH, MAX_HEIGHT), "Flappy Bird!");
 
     auto bird = Bird();
-    auto rectangles = make_rectangles();
+    std::vector<sf::RectangleShape> rectangles;
+
+    if (OBSTACLES){
+        rectangles = make_rectangles();
+    }
+
     bool shouldFlap = false;
 
     wait_to_start_game(window, bird, rectangles);
@@ -206,21 +236,16 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            shouldFlap = false;
-
             if (event.type == sf::Event::Closed)
                 window.close();
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-            {
-                shouldFlap = true;
-            }
+
+            shouldFlap = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
         }
 
         update_game(window, bird, rectangles, shouldFlap);
 
         std::this_thread::sleep_for (std::chrono::milliseconds(UPDATE_RATE_MILLIS));
     }
-
 
     draw_game_over_window(window, bird);
 

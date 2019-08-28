@@ -40,7 +40,7 @@ int make_bird_flap_once()
 
     assert(bird.get_height() == initial_position);
 
-    bird.flap();
+    bird.set_height(initial_position + FLAP_HEIGHT);
     assert(bird.get_height() == initial_position + FLAP_HEIGHT);
     return 0;
 }
@@ -50,7 +50,7 @@ int make_bird_drop_once()
     auto bird = Bird();
 
     bird.set_height(MAX_HEIGHT);
-    bird.drop();
+    bird.set_height(MAX_HEIGHT-DROP_DISTANCE);
     assert(bird.get_height()==(MAX_HEIGHT-DROP_DISTANCE));
     return 0;
 }
@@ -67,8 +67,6 @@ int bird_reaches_top()
     assert(bird.get_height()==0.0);
     assert(bird.is_dead()==true);
 
-    // bird.flap();
-    // assert(bird.get_height()==0.0);
     return 0;
 }
 
@@ -78,7 +76,8 @@ int bird_reaches_floor()
     bird.set_height(MIN_HEIGHT);
     bird.set_velocity(0.0);
 
-    bird.drop();
+    bird.set_height(bird.get_height() - DROP_DISTANCE);
+
     assert(bird.get_height()==MIN_HEIGHT);
     return 0;
 }
@@ -86,25 +85,25 @@ int bird_reaches_floor()
 int falling_bird()
 {
     auto bird = Bird();
-    bird.set_height(MAX_HEIGHT);
+    bird.set_height(0.0);
     bird.set_velocity(0.0);
 
     bird.update_state(false);
 
     assert(bird.get_velocity() == TIMESTEP*GRAVITY);
-    assert(bird.get_height() == MAX_HEIGHT + TIMESTEP*TIMESTEP*GRAVITY);
+    assert(bird.get_height() == 0.0 + TIMESTEP*TIMESTEP*GRAVITY);
 
     bird.update_state(false);
 
     assert(bird.get_velocity() == 2*TIMESTEP*GRAVITY);
-    assert(bird.get_height() == MAX_HEIGHT + 3*TIMESTEP*TIMESTEP*GRAVITY);
+    assert(bird.get_height() == 0.0 + 3*TIMESTEP*TIMESTEP*GRAVITY);
 
 
     bird.update_state(false);
     assert(bird.get_velocity() == 3*TIMESTEP*GRAVITY);
     almost_zero(bird.get_velocity() - 3*TIMESTEP*GRAVITY);
 
-    const double val = bird.get_height() - ( MAX_HEIGHT + 6*TIMESTEP*TIMESTEP*GRAVITY); 
+    const double val = bird.get_height() - ( 0.0 + 6*TIMESTEP*TIMESTEP*GRAVITY); 
     almost_zero(val);
 
     return 0;

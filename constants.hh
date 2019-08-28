@@ -15,10 +15,11 @@ const double DROP_DISTANCE = 0.3;
 
 const double GRAVITY = 50.0;
 
-const double TIMESTEP = 0.5;
-
-double SPEED_OBSTACLES = -50.0;
+const double SPEED_OBSTACLES = -50.0;
 
 const int UPDATE_RATE_MILLIS = 25;
+const double TIMESTEP = UPDATE_RATE_MILLIS/50.0;
 
 const double BIRD_HORIZONTAL_OFFSET = 100.0;
+
+const bool OBSTACLES = false;
