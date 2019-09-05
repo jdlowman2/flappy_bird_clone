@@ -22,4 +22,6 @@ const double TIMESTEP = UPDATE_RATE_MILLIS/50.0;
 
 const double BIRD_HORIZONTAL_OFFSET = 100.0;
 
-const bool OBSTACLES = false;
+const bool OBSTACLES = true;
+
+const bool INVINCIBLE = false;

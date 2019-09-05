@@ -54,12 +54,12 @@ public:
 
         print_state();
 
-        if (height_ <= MIN_HEIGHT || height_ >= (MAX_HEIGHT - 2.0*diameter_))
-        {
-            set_dead(true);
-        }
-
         return;
+    }
+
+    bool is_out_of_bounds() const
+    {
+        return height_ <= MIN_HEIGHT || height_ >= (MAX_HEIGHT - 2.0*diameter_);
     }
 
     double get_height() const

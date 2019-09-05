@@ -9,20 +9,23 @@
 #include <chrono>
 #include <fstream>
 
+#include <random>
 #include <vector>
 
 const double WINDOW_WIDTH = MAX_WIDTH;
 const double WINDOW_HEIGHT = MAX_HEIGHT;
 
+const float RECTANGLE_WIDTH = 300.0;
+
 std::vector<sf::RectangleShape> make_rectangle_pair(const double x_pos, const double y_pos)
 {
     const auto gap_size = 800.f;
 
-    auto top = sf::RectangleShape(sf::Vector2f(50.f, y_pos));
+    auto top = sf::RectangleShape(sf::Vector2f(RECTANGLE_WIDTH, y_pos));
     top.setFillColor(sf::Color::White);
     top.setPosition(x_pos, 0.0);
 
-    auto bottom = sf::RectangleShape(sf::Vector2f(50.f, MAX_HEIGHT - y_pos - gap_size));
+    auto bottom = sf::RectangleShape(sf::Vector2f(RECTANGLE_WIDTH, MAX_HEIGHT - y_pos - gap_size));
     bottom.setFillColor(sf::Color::White);
     bottom.setPosition(x_pos, y_pos + gap_size);
 
@@ -40,21 +43,16 @@ std::vector<sf::RectangleShape> make_rectangles()
 
     std::vector<sf::RectangleShape> shapes;
 
-    for (int horizontal_offset = 0; horizontal_offset < 1000000; horizontal_offset+=1000)
-    {
-        for (const auto position: obstacle_positions)
-        {
-            auto rectangle = sf::RectangleShape(sf::Vector2f(50.f, 500.f));
-            rectangle.setFillColor(sf::Color::White);
-            rectangle.setPosition(position.front() + horizontal_offset, position.back());
+    const int max_offset = 10000;
 
-            shapes.push_back(rectangle);
-        }
-    }
+    std::random_device seeder;
+    std::mt19937 engine(seeder());
+    std::uniform_int_distribution<int> dist(0, max_offset);
 
-    for (int offset=0; offset < 1000000; offset+=1000)
-    {
-        auto pair = make_rectangle_pair(800.0 + offset, offset/10.0 + 100);
+    for (int obs_num=0; obs_num < 1000000; obs_num+=1000)
+    {   
+        const auto offset = 1.0 * dist(engine);
+        auto pair = make_rectangle_pair(2000.0 + obs_num, offset/10.0 + 100);
         for (auto rect: pair)
         {
             shapes.push_back(rect);
@@ -126,15 +124,25 @@ bool is_collision(const Bird & bird, const sf::RectangleShape & rectangle)
 
 bool check_for_collisions(Bird & bird, const std::vector<sf::RectangleShape> & rectangles)
 {   
+
+    if (INVINCIBLE){
+        return false;
+    }
+
     for (auto rectangle: rectangles)
     {
         if (is_collision(bird, rectangle))
         {
             bird.set_dead(true);
-            return true;
         }
     }
-    return false;
+
+    if (bird.is_out_of_bounds())
+    {
+        bird.set_dead(true);
+    }
+
+    return bird.is_dead();
 }
 
 sf::Text draw_game_over_text()
